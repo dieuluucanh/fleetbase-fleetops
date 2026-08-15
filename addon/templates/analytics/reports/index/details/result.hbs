@@ -1,1 +1,6 @@
-<Report::Data @resource={{@model}} />
+<div class="flex flex-col h-full">
+    <div class="flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700">
+        <ReportBuilder::ExportOptions @disabled={{not @model.result_columns}} @onExport={{this.export}} />
+    </div>
+    <Report::Data @resource={{@model}} />
+</div>
