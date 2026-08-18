@@ -11,7 +11,7 @@
                 @onClick={{perform this.refreshAndExecute}}
             />
         {{/if}}
-        <ReportBuilder::ExportOptions @disabled={{not @model.result_columns}} @onExport={{this.export}} />
+        <ReportBuilder::ExportOptions @disabled={{not this.result}} @onExport={{this.export}} />
     </div>
-    <Report::Data @resource={{@model}} />
+    <Report::Data @resource={{this.result}} />
 </div>

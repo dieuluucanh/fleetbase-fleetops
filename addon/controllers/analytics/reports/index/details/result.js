@@ -10,8 +10,16 @@ export default class AnalyticsReportsIndexDetailsResultController extends Contro
     @service notifications;
 
     @tracked tableRefreshable = null;
+    @tracked result = null;
 
     setup() {
+        if (isArray(this.model?.result_columns)) {
+            this.result = {
+                columns: this.model.result_columns,
+                data: this.model.data ?? [],
+                meta: this.model.meta ?? {},
+            };
+        }
         this.loadRefreshableStatus.perform();
     }
 
@@ -60,6 +68,7 @@ export default class AnalyticsReportsIndexDetailsResultController extends Contro
             // Step 2: Re-execute the query with fresh data
             const result = yield report.execute();
             report.fillResult(result);
+            this.result = result;
             this.notifications.success('Report refreshed successfully');
         } catch (error) {
             this.notifications.serverError(error);
