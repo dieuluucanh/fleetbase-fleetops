@@ -1,5 +1,16 @@
 <div class="flex flex-col h-full">
-    <div class="flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700 space-x-2">
+        {{#if this.tableRefreshable}}
+            <Button
+                @type="success"
+                @icon="sync"
+                @text={{this.tableRefreshable.label}}
+                @size="xs"
+                @disabled={{this.refreshAndExecute.isRunning}}
+                @isLoading={{this.refreshAndExecute.isRunning}}
+                @onClick={{perform this.refreshAndExecute}}
+            />
+        {{/if}}
         <ReportBuilder::ExportOptions @disabled={{not @model.result_columns}} @onExport={{this.export}} />
     </div>
     <Report::Data @resource={{@model}} />
