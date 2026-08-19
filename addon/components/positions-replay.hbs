@@ -53,27 +53,50 @@
                         </marker.tooltip>
                     </layers.tracking-marker>
                 {{/if}}
-                {{#each this.positions as |position index|}}
-                    <layers.circle-marker
-                        @location={{array position.latitude position.longitude}}
-                        @radius={{3}}
+                {{#if this.routeCoordinates}}
+                    <layers.polyline
+                        @locations={{this.routeCoordinates}}
                         @color="#3b82f6"
-                        @fillColor="#3b82f6"
-                        @fillOpacity={{0.6}}
-                        @onClick={{fn this.onPositionClicked position}}
+                        @weight={{4}}
+                        @opacity={{0.8}}
+                    />
+                {{/if}}
+                {{#if this.startPosition}}
+                    <layers.circle-marker
+                        @location={{array this.startPosition.latitude this.startPosition.longitude}}
+                        @radius={{8}}
+                        @color="#22c55e"
+                        @fillColor="#22c55e"
+                        @fillOpacity={{0.8}}
                         as |marker|
                     >
                         <marker.popup>
                             <div class="text-xs">
-                                <div><strong>Position {{add index 1}}</strong></div>
-                                <div>Time: {{position.timestamp}}</div>
-                                <div>Speed: {{position.speedKmh}} km/h</div>
-                                <div>Heading: {{or position.heading "N/A"}}°</div>
-                                <div>Altitude: {{or position.altitude "N/A"}} m</div>
+                                <div><strong>Start</strong></div>
+                                <div>Time: {{this.startPosition.timestamp}}</div>
+                                <div>Speed: {{this.startPosition.speedKmh}} km/h</div>
                             </div>
                         </marker.popup>
                     </layers.circle-marker>
-                {{/each}}
+                {{/if}}
+                {{#if (and this.endPosition (not-eq this.endPosition this.startPosition))}}
+                    <layers.circle-marker
+                        @location={{array this.endPosition.latitude this.endPosition.longitude}}
+                        @radius={{8}}
+                        @color="#ef4444"
+                        @fillColor="#ef4444"
+                        @fillOpacity={{0.8}}
+                        as |marker|
+                    >
+                        <marker.popup>
+                            <div class="text-xs">
+                                <div><strong>End</strong></div>
+                                <div>Time: {{this.endPosition.timestamp}}</div>
+                                <div>Speed: {{this.endPosition.speedKmh}} km/h</div>
+                            </div>
+                        </marker.popup>
+                    </layers.circle-marker>
+                {{/if}}
             </LeafletMap>
         </div>
     </div>
@@ -292,7 +315,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {{#each this.positions as |position index|}}
+                        {{#each this.paginatedPositions as |position index|}}
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 {{if (eq index this.currentReplayIndex) 'bg-blue-50 dark:bg-blue-900'}}">
                                 <td class="px-2 py-1 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                     {{add index 1}}
@@ -321,6 +344,32 @@
                 </table>
             </div>
         </div>
+        {{#if (gt this.tableMeta.last_page 1)}}
+            <div class="flex items-center justify-between px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                    Showing {{this.tableMeta.from}} to {{this.tableMeta.to}} of {{this.tableMeta.total}}
+                </span>
+                <div class="flex items-center space-x-2">
+                    <Button
+                        @type="default"
+                        @icon="chevron-left"
+                        @size="xs"
+                        @disabled={{lte this.tablePage 1}}
+                        @onClick={{fn this.onPageChange (sub this.tablePage 1)}}
+                    />
+                    <span class="text-xs text-gray-600 dark:text-gray-400">
+                        Page {{this.tablePage}} of {{this.tableMeta.last_page}}
+                    </span>
+                    <Button
+                        @type="default"
+                        @icon="chevron-right"
+                        @size="xs"
+                        @disabled={{gte this.tablePage this.tableMeta.last_page}}
+                        @onClick={{fn this.onPageChange (add this.tablePage 1)}}
+                    />
+                </div>
+            </div>
+        {{/if}}
     {{/if}}
 
     {{#unless this.hasPositions}}

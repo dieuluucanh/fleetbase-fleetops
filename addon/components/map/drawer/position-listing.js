@@ -30,6 +30,7 @@ export default class MapDrawerPositionListingComponent extends Component {
     @tracked replaySpeed = '1';
     @tracked positionsLayer = null;
     @tracked positionOverlayIds = [];
+    @tracked positionPolylineIds = [];
     @tracked selectedTrackableModelName = null;
 
     /** Computed properties - read state from service */
@@ -294,7 +295,7 @@ export default class MapDrawerPositionListingComponent extends Component {
 
         try {
             const params = {
-                limit: 900,
+                limit: -1,
                 sort: 'created_at',
                 subject_uuid: this.resource.id,
             };
@@ -316,7 +317,7 @@ export default class MapDrawerPositionListingComponent extends Component {
                 : [];
 
             if (this.positions.length > 0) {
-                this.#renderPositionsOnMap({ fitLast: 5 });
+                this.#renderPositionsOnMap();
             } else if (this.resource) {
                 this.focusResource(this.resource);
             }
@@ -389,7 +390,11 @@ export default class MapDrawerPositionListingComponent extends Component {
             for (const overlayId of this.positionOverlayIds) {
                 this.mapManager.removeMarker(overlayId);
             }
+            for (const overlayId of this.positionPolylineIds) {
+                this.mapManager.removeOverlay(overlayId);
+            }
             this.positionOverlayIds = [];
+            this.positionPolylineIds = [];
             return;
         }
 
@@ -406,20 +411,18 @@ export default class MapDrawerPositionListingComponent extends Component {
         }
     }
 
-    #addPositionMarker(pos, index) {
-        const lat = parseFloat(pos.latitude);
-        const lng = parseFloat(pos.longitude);
-        if (!this.#isValidLatLng(lat, lng)) return;
-
+    #addStartEndMarker(lat, lng, label, color) {
+        const pos = { latitude: lat, longitude: lng };
         if (this.mapManager.isGoogleMaps) {
-            const overlayId = `position-history:${this.resource?.id ?? 'resource'}:${index}`;
+            const overlayId = `position-history:${this.resource?.id ?? 'resource'}:${label}`;
             const dot = document.createElement('div');
             dot.className = 'fleetops-position-history-dot';
-            dot.title = `Position ${index + 1}`;
+            dot.style.backgroundColor = color;
+            dot.title = label;
 
             this.mapManager.addMarker(overlayId, lat, lng, {
                 content: dot,
-                title: `Position ${index + 1}`,
+                title: label,
                 onClick: () => this.onPositionClicked(pos),
             });
             this.positionOverlayIds = [...this.positionOverlayIds, overlayId];
@@ -427,28 +430,15 @@ export default class MapDrawerPositionListingComponent extends Component {
         }
 
         ensureLeafletDrawEditNamespace(L);
-        ensureLeafletDrawEditNamespace();
         const marker = L.circleMarker([lat, lng], {
-            radius: 3,
-            color: '#3b82f6',
-            fillColor: '#3b82f6',
-            fillOpacity: 0.6,
+            radius: 8,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.8,
         });
 
-        // Popup content (mirrors your template)
-        const html = `<div class="text-xs">
-        <div><strong>Position ${index + 1}</strong></div>
-        <div>Time: ${pos.timestamp ?? ''}</div>
-        <div>Speed: ${pos.speedKmh ?? 'N/A'} km/h</div>
-        <div>Heading: ${pos.heading ?? 'N/A'}°</div>
-        <div>Altitude: ${pos.altitude ?? 'N/A'} m</div>
-        </div>`;
-
+        const html = `<div class="text-xs"><strong>${label}</strong></div>`;
         marker.bindPopup(html);
-
-        // Click handler -> reuse your action
-        marker.on('click', () => this.onPositionClicked(pos));
-
         marker.addTo(this.positionsLayer);
     }
 
@@ -456,7 +446,7 @@ export default class MapDrawerPositionListingComponent extends Component {
         return Number.isFinite(lat) && Number.isFinite(lng) && lat <= 90 && lat >= -90 && lng <= 180 && lng >= -180 && lat !== 0 && lng !== 0;
     }
 
-    #renderPositionsOnMap({ fitLast = 0, minZoom = 15, maxZoom = 18 } = {}) {
+    #renderPositionsOnMap({ minZoom = 15, maxZoom = 18 } = {}) {
         if ((!this.mapManager.isGoogleMaps && !this.leafletMapManager.map) || !this.positions?.length) {
             this.#clearPositionsLayer(false);
             return;
@@ -466,23 +456,42 @@ export default class MapDrawerPositionListingComponent extends Component {
         this.#clearPositionsLayer(false);
 
         const latlngs = [];
-        this.positions.forEach((pos, i) => {
+        this.positions.forEach((pos) => {
             const lat = parseFloat(pos.latitude);
             const lng = parseFloat(pos.longitude);
             if (this.#isValidLatLng(lat, lng)) {
-                this.#addPositionMarker(pos, i);
                 latlngs.push([lat, lng]);
             }
         });
 
         if (!latlngs.length) return;
 
-        // choose subset (e.g., last 5 points) to bias the view local
-        const slice = fitLast > 0 ? latlngs.slice(-fitLast) : latlngs;
-        const zoomBounds = this.#getReplayViewportZoomBounds({ minZoom, maxZoom });
+        if (this.mapManager.isGoogleMaps) {
+            const polylineId = `position-route:${this.resource?.id ?? 'resource'}`;
+            this.mapManager.addPolyline(polylineId, latlngs, {
+                color: '#3b82f6',
+                weight: 4,
+                opacity: 0.8,
+            });
+            this.positionPolylineIds = [...this.positionPolylineIds, polylineId];
+        } else {
+            ensureLeafletDrawEditNamespace(L);
+            L.polyline(latlngs, {
+                color: '#3b82f6',
+                weight: 4,
+                opacity: 0.8,
+            }).addTo(this.positionsLayer);
+        }
 
-        // Clamp zoom to neighborhood-level
-        this.#fitNeighborhood(slice, { zoom: 16, minZoom: zoomBounds.minZoom, maxZoom: zoomBounds.maxZoom, padding: [24, 24], animate: true });
+        const first = latlngs[0];
+        const last = latlngs[latlngs.length - 1];
+        this.#addStartEndMarker(first[0], first[1], 'Start', '#22c55e');
+        if (latlngs.length > 1) {
+            this.#addStartEndMarker(last[0], last[1], 'End', '#ef4444');
+        }
+
+        const zoomBounds = this.#getReplayViewportZoomBounds({ minZoom, maxZoom });
+        this.#fitNeighborhood(latlngs, { zoom: 16, minZoom: zoomBounds.minZoom, maxZoom: zoomBounds.maxZoom, padding: [24, 24], animate: true });
     }
 
     #fitNeighborhood(latlngs, { zoom = null, minZoom = 15, maxZoom = 18, padding = [16, 16], animate = true } = {}) {
