@@ -153,17 +153,13 @@ export default class PositionsReplayComponent extends Component {
     /** Table pagination */
     tablePageSize = 100;
 
-    get reversedPositions() {
-        return [...this.positions].reverse();
-    }
-
     get paginatedPositions() {
         const start = (this.tablePage - 1) * this.tablePageSize;
-        return this.reversedPositions.slice(start, start + this.tablePageSize);
+        return this.positions.slice(start, start + this.tablePageSize);
     }
 
     get tableMeta() {
-        const total = this.reversedPositions.length;
+        const total = this.positions.length;
         const lastPage = Math.max(1, Math.ceil(total / this.tablePageSize));
         const from = total === 0 ? 0 : (this.tablePage - 1) * this.tablePageSize + 1;
         const to = Math.min(this.tablePage * this.tablePageSize, total);
