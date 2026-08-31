@@ -38,7 +38,7 @@ export default class CustomerOrdersComponent extends Component {
     @tracked longitude;
     @tracked route;
     @tracked query;
-    @tracked tileSourceUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+    @tracked tileSourceUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
     @tracked scheduledAt;
     @tracked deliveryInstructions = {};
 

@@ -48,7 +48,7 @@ export default class MapLeafletLiveMapComponent extends Component {
     @tracked latitude = this.location.getLatitude();
     @tracked longitude = this.location.getLongitude();
     @tracked contextmenuItems = [];
-    @tracked tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+    @tracked tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
     @tracked theme = 'light';
     @tracked routes = [];
     @tracked drivers = [];
@@ -893,16 +893,16 @@ export default class MapLeafletLiveMapComponent extends Component {
         switch (source) {
             case 'dark':
                 this.theme = 'dark';
-                this.tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+                this.tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
                 break;
             case 'custom':
                 this.theme = 'custom';
-                this.tileUrl = source.startsWith('https://') ? source : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+                this.tileUrl = source.startsWith('https://') ? source : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
                 break;
             case 'light':
             default:
                 this.theme = 'light';
-                this.tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+                this.tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
                 break;
         }
     }

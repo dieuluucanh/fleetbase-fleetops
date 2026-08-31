@@ -75,7 +75,11 @@
             @zoomControl={{false}}
             as |layers|
         >
-            <layers.tile @url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png" />
+            <layers.tile
+                @url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                @maxZoom={{19}}
+                @attribution="&copy; OpenStreetMap contributors"
+            />
             <layers.marker
                 @id={{@resource.id}}
                 @icon={{icon iconUrl=(or @resource.avatar_url "/engines-dist/images/building-marker.png") iconSize=(array 40 40)}}

@@ -26,11 +26,10 @@ export default class PositionsReplayComponent extends Component {
     @tracked map = null;
     @tracked replaySpeed = '1';
     @tracked metrics = null;
-    @tracked tablePage = 1;
     @tracked latitude = this.args.resource.latitude || this.location.getLatitude();
     @tracked longitude = this.args.resource.longitude || this.location.getLongitude();
     @tracked zoom = 14;
-    @tracked tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+    @tracked tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     /** Computed properties - read state from service */
     get isReplaying() {
@@ -150,42 +149,6 @@ export default class PositionsReplayComponent extends Component {
         }
     }
 
-    /** Table pagination */
-    tablePageSize = 100;
-
-    get paginatedPositions() {
-        const start = (this.tablePage - 1) * this.tablePageSize;
-        return this.positions.slice(start, start + this.tablePageSize);
-    }
-
-    get tableMeta() {
-        const total = this.positions.length;
-        const lastPage = Math.max(1, Math.ceil(total / this.tablePageSize));
-        const from = total === 0 ? 0 : (this.tablePage - 1) * this.tablePageSize + 1;
-        const to = Math.min(this.tablePage * this.tablePageSize, total);
-        return { total, current_page: this.tablePage, last_page: lastPage, from, to };
-    }
-
-    /** Map route data */
-    get routeCoordinates() {
-        return this.positions
-            .filter((p) => this.#isValidLatLng(p.latitude, p.longitude))
-            .map((p) => [p.latitude, p.longitude]);
-    }
-
-    get startPosition() {
-        return this.positions.find((p) => this.#isValidLatLng(p.latitude, p.longitude)) ?? null;
-    }
-
-    get endPosition() {
-        for (let i = this.positions.length - 1; i >= 0; i--) {
-            if (this.#isValidLatLng(this.positions[i].latitude, this.positions[i].longitude)) {
-                return this.positions[i];
-            }
-        }
-        return null;
-    }
-
     /** Constants */
     speedOptions = [
         { label: '0.5x', value: '0.5' },
@@ -256,15 +219,6 @@ export default class PositionsReplayComponent extends Component {
 
     @action onDateRangeChanged({ formattedDate }) {
         if (isArray(formattedDate) && formattedDate.length === 2) {
-            const [start, end] = formattedDate;
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            const diffMs = endDate.getTime() - startDate.getTime();
-            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            if (diffDays > 3) {
-                this.notifications.warning('Maximum date range is 3 days');
-                return;
-            }
             this.dateFilter = formattedDate;
             this.loadPositions.perform();
         }
@@ -339,10 +293,6 @@ export default class PositionsReplayComponent extends Component {
         }
     }
 
-    @action onPageChange(page) {
-        this.tablePage = page;
-    }
-
     @action onTrackingMarkerAdded(resource, { target: layer }) {
         this.#setResourceLayer(resource, layer);
     }
@@ -356,7 +306,7 @@ export default class PositionsReplayComponent extends Component {
 
         try {
             const params = {
-                limit: -1,
+                limit: 900,
                 sort: 'created_at',
                 subject_uuid: this.args.resource.id,
             };
@@ -371,18 +321,19 @@ export default class PositionsReplayComponent extends Component {
 
             const positions = yield this.store.query('position', params);
             this.positions = isArray(positions) ? positions : [];
-            this.tablePage = 1;
 
             if (this.positions?.length) {
                 yield this.loadMetrics.perform();
 
-                const allBounds = positions
+                const bounds = positions
                     .filter(({ latitude, longitude }) => this.#isValidLatLng(latitude, longitude))
                     .map((pos) => pos.latLng)
                     .filter(Boolean);
-                if (allBounds.length > 0) {
-                    this.map.fitBounds(allBounds, { padding: [30, 30] });
-                }
+                const lastFiveBounds = bounds.slice(-5);
+                this.map.flyToBounds(lastFiveBounds, {
+                    animate: true,
+                    zoom: 16,
+                });
             }
 
             // Reset replay state when positions change

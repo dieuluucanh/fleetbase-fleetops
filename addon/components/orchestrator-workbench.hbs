@@ -112,7 +112,11 @@
         <div class="map-panel flex-1 relative overflow-hidden">
             <div class="orchestrator-map-container fleetbase-leaflet-map-container next-map-container w-full h-full">
                 <LeafletMap @lat={{this.mapCenter.lat}} @lng={{this.mapCenter.lng}} @zoom={{this.mapZoom}} @onLoad={{this.onMapLoad}} class="w-full h-full" as |layers|>
-                    <layers.tile @url={{this.tileSourceUrl}} />
+                    <layers.tile
+                        @url={{this.tileSourceUrl}}
+                        @maxZoom={{19}}
+                        @attribution="&copy; OpenStreetMap contributors"
+                    />
 
                     {{! ── Unassigned order markers ──
                          Handles both standard pickup/dropoff orders and multi-drop

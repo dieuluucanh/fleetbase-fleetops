@@ -14,8 +14,8 @@ const DEFAULT_ZOOM = 11;
 // Match the rest of fleetops' Leaflet maps (light Carto basemap), which keeps the
 // dashboard styling consistent with the operational live map. Falls back gracefully
 // in dark mode via the next-leaflet-container-map theming.
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-const TILE_URL_DARK = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const TILE_URL_DARK = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 const RECONCILE_INTERVAL_MS = 5 * 60_000;
 
