@@ -27,7 +27,11 @@
             @zoomControl={{false}}
             as |layers|
         >
-            <layers.tile @url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png" />
+            <layers.tile
+                @url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                @maxZoom={{19}}
+                @attribution="&copy; OpenStreetMap contributors"
+            />
             <layers.polygon
                 @id={{@resource.id}}
                 @record={{@resource}}

@@ -30,7 +30,7 @@ export default class PositionsReplayComponent extends Component {
     @tracked latitude = this.args.resource.latitude || this.location.getLatitude();
     @tracked longitude = this.args.resource.longitude || this.location.getLongitude();
     @tracked zoom = 14;
-    @tracked tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+    @tracked tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     /** Computed properties - read state from service */
     get isReplaying() {

@@ -24,7 +24,7 @@
                 {{set-container-dimensions}}
                 as |layers|
             >
-                <layers.tile @url={{this.tileUrl}} />
+                <layers.tile @url={{this.tileUrl}} @maxZoom={{19}} @attribution="&copy; OpenStreetMap contributors" />
 
                 {{#if this.load.isIdle}}
                     {{! Drivers — fleetops' rotating tracking-marker matches the operational

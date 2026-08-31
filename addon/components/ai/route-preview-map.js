@@ -169,10 +169,10 @@ export default class AiRoutePreviewMapComponent extends Component {
         const theme = document.body?.dataset?.theme;
 
         if (theme === 'dark') {
-            return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
         }
 
-        return 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+        return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
     }
 
     get emptyText() {

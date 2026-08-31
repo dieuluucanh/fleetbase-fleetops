@@ -38,7 +38,11 @@
                                     </div>
                                     <div class="order-tracking-lookup-map-wrapper">
                                         <LeafletMap @lat={{this.latitude}} @lng={{this.longitude}} @zoom={{this.zoom}} @onLoad={{this.setupMap}} ...attributes as |layers|>
-                                            <layers.tile @url={{this.tileSourceUrl}} />
+                                            <layers.tile
+                                                @url={{this.tileSourceUrl}}
+                                                @maxZoom={{19}}
+                                                @attribution="&copy; OpenStreetMap contributors"
+                                            />
                                             {{#let this.order.driver_assigned as |driver|}}
                                                 {{#if driver}}
                                                     <layers.tracking-marker

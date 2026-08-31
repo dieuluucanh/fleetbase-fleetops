@@ -55,7 +55,11 @@
             ...attributes
             as |layers|
         >
-            <layers.tile @url={{this.tileUrl}} />
+            <layers.tile
+                @url={{this.tileUrl}}
+                @maxZoom={{19}}
+                @attribution="&copy; OpenStreetMap contributors"
+            />
 
             <layers.draw-control
                 @position="topright"

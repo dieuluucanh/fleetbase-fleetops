@@ -10,7 +10,11 @@
             ...attributes
             as |layers|
         >
-            <layers.tile @url={{this.tileSourceUrl}} />
+            <layers.tile
+                @url={{this.tileSourceUrl}}
+                @maxZoom={{19}}
+                @attribution="&copy; OpenStreetMap contributors"
+            />
             {{#if @options.serviceArea}}
                 <layers.polygon
                     @id={{@options.serviceArea.id}}

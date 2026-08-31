@@ -17,7 +17,11 @@
                 {{did-update this.syncPreview this.routeSignature}}
                 as |layers|
             >
-                <layers.tile @url={{this.tileUrl}} />
+                <layers.tile
+                    @url={{this.tileUrl}}
+                    @maxZoom={{19}}
+                    @attribution="© OpenStreetMap contributors"
+                />
                 {{#if this.hasRouteLine}}
                     {{#each this.routeStyles as |style|}}
                         <layers.polyline
