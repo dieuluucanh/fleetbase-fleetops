@@ -33,7 +33,7 @@ export default class ManagementDriversIndexController extends Controller {
         'status',
     ];
     @tracked page = 1;
-    @tracked limit;
+    @tracked limit = 10;
     @tracked sort = '-created_at';
     @tracked public_id;
     @tracked internal_id;
