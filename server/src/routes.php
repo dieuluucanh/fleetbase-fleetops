@@ -634,6 +634,8 @@ Route::prefix(config('fleetops.api.routing.prefix'))->namespace('Fleetbase\Fleet
                             function ($router) {
                                 $router->get('reverse', 'GeocoderController@reverse');
                                 $router->get('query', 'GeocoderController@geocode');
+                                // Open-source geocoder via Nominatim
+                                $router->get('query-oss', 'GeocoderController@geocodeOss');
                             }
                         );
                         $router->group(
